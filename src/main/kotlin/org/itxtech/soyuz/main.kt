@@ -57,10 +57,19 @@ object Soyuz : KotlinPlugin(
 
     private lateinit var server: ApplicationEngine
 
+    private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
+
     private val sessions = Collections.synchronizedSet<SoyuzWebSocketSession>(LinkedHashSet())
 
     override fun onEnable() {
         SoyuzData.reload()
+        if (SoyuzData.token == "pending") {
+            SoyuzData.token = (1..20)
+                .map { kotlin.random.Random.nextInt(0, charPool.size) }
+                .map(charPool::get)
+                .joinToString("")
+            logger.info("Soyuz Access Token: ${SoyuzData.token}")
+        }
 
         server = embeddedServer(Netty, port = SoyuzData.port) {
             install(WebSockets) {
@@ -103,5 +112,6 @@ object Soyuz : KotlinPlugin(
 }
 
 object SoyuzData : AutoSavePluginConfig("config") {
+    var token by value("pending")
     val port by value(9876)
 }

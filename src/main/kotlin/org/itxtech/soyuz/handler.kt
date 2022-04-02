@@ -24,10 +24,8 @@
 
 package org.itxtech.soyuz
 
-import io.ktor.http.cio.websocket.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import net.mamoe.mirai.console.plugin.PluginManager
 import net.mamoe.mirai.console.plugin.PluginManager.INSTANCE.description
@@ -35,23 +33,6 @@ import net.mamoe.mirai.console.plugin.description.PluginDescription
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
-
-@Serializable
-data class BaseMessage(
-    val key: String
-)
-
-@Serializable
-data class ReplyMessage(
-    val key: String,
-    val msg: String
-) {
-    companion object {
-        fun error(msg: String): ReplyMessage {
-            return ReplyMessage("error", msg)
-        }
-    }
-}
 
 object HandlerManager {
     private val handlers = hashMapOf<String, SoyuzHandler>()
@@ -68,27 +49,32 @@ object HandlerManager {
         return this
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     suspend fun decode(session: SoyuzWebSocketSession, text: String) {
-        try {
-            val base = Soyuz.json.decodeFromString<BaseMessage>(text)
-            if (handlers.containsKey(base.key)) {
-                val handler = handlers[base.key]!!
+        handleMessage(session, text) {
+            if (handlers.containsKey(it.key)) {
+                val handler = HandlerManager.handlers[it.key]!!
                 handler.handle(session, text)
             } else {
-                throw InvalidSoyuzMessageException("Invalid message key ${base.key}")
+                throw InvalidSoyuzMessageException("Invalid message key ${it.key}")
             }
-        } catch (e: Throwable) {
-            session.session.send(
-                Frame.Text(
-                    Soyuz.json.encodeToString(
-                        ReplyMessage.error(e.message ?: "Error with no message")
-                    )
-                )
-            )
-            Soyuz.logger.error(e)
         }
     }
+}
+
+@OptIn(ExperimentalSerializationApi::class)
+suspend inline fun handleMessage(
+    session: SoyuzWebSocketSession,
+    text: String,
+    block: (it: BaseMessage) -> Unit
+): Boolean {
+    try {
+        block(Soyuz.json.decodeFromString(BaseMessage.serializer(), text))
+        return true
+    } catch (e: Throwable) {
+        session.sendText(Soyuz.json.encodeToString(ReplyMessage.error(e.message ?: "Error with no message")))
+        Soyuz.logger.error(e)
+    }
+    return false
 }
 
 abstract class SoyuzHandler(val key: String) {

@@ -27,27 +27,49 @@ package org.itxtech.soyuz
 import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
 import java.net.InetSocketAddress
+
+class UnauthorizedSessionException(msg: String) : Exception(msg)
 
 @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
-    private val remote: InetSocketAddress
+    private var authorized = false
+    private val id: String
 
     init {
         val origin = session.call.request.origin as io.ktor.server.netty.http1.NettyConnectionPoint
-        remote = origin.context.channel().remoteAddress() as InetSocketAddress
+        val remote = origin.context.channel().remoteAddress() as InetSocketAddress
+        id = "${remote.address}:${remote.port}"
     }
 
     fun connected() {
-        Soyuz.logger.info("WebSocket Session connected from ${remote.address}:${remote.port}")
+        Soyuz.logger.info("WebSocket Session connected from $id")
     }
 
     fun disconnected() {
-        Soyuz.logger.info("WebSocket Session disconnected from ${remote.address}:${remote.port}")
+        Soyuz.logger.info("WebSocket Session disconnected from $id")
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     suspend fun handle(text: String) {
-        HandlerManager.decode(this, text)
+        if (authorized) {
+            HandlerManager.decode(this, text)
+        } else {
+            handleMessage(this, text) {
+                if (it.key == "authorize") {
+                    val msg = Soyuz.json.decodeFromString(AuthorizeMessage.serializer(), text)
+                    if (msg.token == SoyuzData.token) {
+                        authorized = true
+                        sendText(Soyuz.json.encodeToString(ReplyMessage("authorize", "Session has been authorized")))
+                        Soyuz.logger.info("Session $id has been authorized")
+                        return
+                    }
+                }
+                throw UnauthorizedSessionException("Unauthorized session $id sends a message")
+            }
+        }
     }
 
     suspend fun sendText(data: String) {
