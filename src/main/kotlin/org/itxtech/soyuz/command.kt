@@ -29,7 +29,7 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 
 @OptIn(ConsoleExperimentalApi::class)
 object SoyuzCommand : CompositeCommand(
-    PluginMain,
+    Soyuz,
     primaryName = "soyuz",
     description = "设置 iTXTech Soyuz"
 ) {

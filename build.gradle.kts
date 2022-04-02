@@ -2,6 +2,7 @@ plugins {
     id("me.him188.maven-central-publish") version "1.0.0-dev-3"
     val kotlinVersion = "1.6.0"
     kotlin("jvm") version kotlinVersion
+    kotlin("plugin.serialization") version "1.6.20-RC"
 
     id("net.mamoe.mirai-console") version "2.11.0-M1"
 }
@@ -25,6 +26,7 @@ repositories {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-server-core:1.6.8")
     // External Dependencies
     compileOnly("org.itxtech:mcl:2.0.0-beta.2")
     compileOnly("net.mamoe:mirai-console-terminal:2.11.0-M2.1")
@@ -32,6 +34,27 @@ dependencies {
 
     // Embedded Dependencies
     implementation("io.ktor:ktor-websockets:1.6.8")
+    implementation("io.ktor:ktor-server-netty:1.6.8")
+}
+
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes["Name"] = "iTXTech Soyuz"
+        attributes["Revision"] = Runtime.getRuntime().exec("git rev-parse --short HEAD")
+            .inputStream.bufferedReader().readText().trim()
+    }
+
+    val list = ArrayList<Any>()
+
+    configurations.compileClasspath.get().copyRecursive().forEach { file ->
+        arrayOf("ktor-websockets", "ktor-server").forEach {
+            if (file.absolutePath.contains(it)) {
+                list.add(zipTree(file))
+            }
+        }
+    }
+
+    from(list)
 }
 
 mavenCentralPublish {
