@@ -1,4 +1,4 @@
-# iTXTech Soyuz
+# iTXTech Soyuz - `Союз`
 
 为 [Mirai Console](https://github.com/mamoe/mirai) 提供 `Websocket API` 服务器。
 

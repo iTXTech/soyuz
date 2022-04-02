@@ -22,14 +22,16 @@
  *
  */
 
-package org.itxtech.soyuz
+package org.itxtech.soyuz.handler
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import net.mamoe.mirai.console.plugin.PluginManager
-import net.mamoe.mirai.console.plugin.PluginManager.INSTANCE.description
-import net.mamoe.mirai.console.plugin.description.PluginDescription
+import org.itxtech.soyuz.BaseMessage
+import org.itxtech.soyuz.ReplyMessage
+import org.itxtech.soyuz.Soyuz
+import org.itxtech.soyuz.SoyuzWebSocketSession
+import org.itxtech.soyuz.handler.builtin.ListPluginHandler
+import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
@@ -39,6 +41,8 @@ object HandlerManager {
 
     init {
         register(ListPluginHandler())
+        register(MiraiInfoHandler())
+//        register(PushLogHandler())
     }
 
     fun register(handler: SoyuzHandler): HandlerManager {
@@ -52,7 +56,7 @@ object HandlerManager {
     suspend fun decode(session: SoyuzWebSocketSession, text: String) {
         handleMessage(session, text) {
             if (handlers.containsKey(it.key)) {
-                val handler = HandlerManager.handlers[it.key]!!
+                val handler = handlers[it.key]!!
                 handler.handle(session, text)
             } else {
                 throw InvalidSoyuzMessageException("Invalid message key ${it.key}")
@@ -79,35 +83,4 @@ suspend inline fun handleMessage(
 
 abstract class SoyuzHandler(val key: String) {
     abstract suspend fun handle(session: SoyuzWebSocketSession, data: String)
-}
-
-class ListPluginHandler : SoyuzHandler("soyuz-list-plugin") {
-    @Serializable
-    data class PluginList(
-        val list: List<PluginInfo>
-    )
-
-    @Serializable
-    data class PluginInfo(
-        val name: String,
-        val version: String,
-        val info: String?,
-        val author: String?
-    ) {
-        companion object {
-            fun fromDescription(desc: PluginDescription): PluginInfo {
-                return PluginInfo(desc.name, desc.version.toString(), desc.info, desc.author)
-            }
-        }
-    }
-
-    @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun handle(session: SoyuzWebSocketSession, data: String) {
-        session.sendText(
-            Soyuz.json.encodeToString(
-                PluginList(PluginManager.plugins
-                    .map { p -> PluginInfo.fromDescription(p.description) })
-            )
-        )
-    }
 }

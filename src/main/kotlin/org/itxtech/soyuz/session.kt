@@ -29,6 +29,8 @@ import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
+import org.itxtech.soyuz.handler.HandlerManager
+import org.itxtech.soyuz.handler.handleMessage
 import java.net.InetSocketAddress
 
 class UnauthorizedSessionException(msg: String) : Exception(msg)
@@ -36,7 +38,8 @@ class UnauthorizedSessionException(msg: String) : Exception(msg)
 @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
     private var authorized = false
-    private val id: String
+    val id: String
+    var connected = true
 
     init {
         val origin = session.call.request.origin as io.ktor.server.netty.http1.NettyConnectionPoint
@@ -50,6 +53,7 @@ class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
 
     fun disconnected() {
         Soyuz.logger.info("WebSocket Session disconnected from $id")
+        connected = false
     }
 
     @OptIn(ExperimentalSerializationApi::class)

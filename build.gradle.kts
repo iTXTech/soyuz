@@ -28,7 +28,7 @@ repositories {
 dependencies {
     // External Dependencies
     compileOnly("org.itxtech:mcl:2.0.0-beta.2")
-    compileOnly("net.mamoe:mirai-console-terminal:2.11.0-M2.1")
+    compileOnly("net.mamoe:mirai-console-terminal:2.11.0-M1")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 
     // Embedded Dependencies

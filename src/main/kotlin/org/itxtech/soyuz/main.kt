@@ -114,4 +114,5 @@ object Soyuz : KotlinPlugin(
 object SoyuzData : AutoSavePluginConfig("config") {
     var token by value("pending")
     val port by value(9876)
+    val enablePushLog by value(true)
 }
