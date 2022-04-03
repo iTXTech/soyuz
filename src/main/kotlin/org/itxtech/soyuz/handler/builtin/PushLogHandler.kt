@@ -117,8 +117,7 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
 internal class SoyuzLogService(
     private val pushLogHandler: PushLogHandler,
     private val base: net.mamoe.mirai.console.terminal.LoggingService
-) :
-    net.mamoe.mirai.console.terminal.LoggingService() {
+) : net.mamoe.mirai.console.terminal.LoggingService() {
     override fun `pushLine$mirai_console_terminal`(line: String) {
         base.pushLine(line)
         pushLogHandler.sendLine(line)
@@ -129,8 +128,7 @@ internal class SoyuzLogService(
 internal class SoyuzConsoleCommandSender(
     private val pushLogHandler: PushLogHandler,
     private val base: MiraiConsoleImplementation.ConsoleCommandSenderImpl
-) :
-    MiraiConsoleImplementation.ConsoleCommandSenderImpl {
+) : MiraiConsoleImplementation.ConsoleCommandSenderImpl {
     override suspend fun sendMessage(message: String) {
         base.sendMessage(message)
         pushLogHandler.sendLine(message)

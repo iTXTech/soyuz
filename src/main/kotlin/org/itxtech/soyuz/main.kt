@@ -31,6 +31,8 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
@@ -59,15 +61,17 @@ object Soyuz : KotlinPlugin(
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    private val sessions = Collections.synchronizedSet<SoyuzWebSocketSession>(LinkedHashSet())
+    val sessions = Collections.synchronizedMap<String, SoyuzWebSocketSession>(LinkedHashMap())
+
+    fun generateRandomString(len: Int) = (1..len)
+        .map { kotlin.random.Random.nextInt(0, charPool.size) }
+        .map(charPool::get)
+        .joinToString("")
 
     override fun onEnable() {
         SoyuzData.reload()
         if (SoyuzData.token == "pending") {
-            SoyuzData.token = (1..20)
-                .map { kotlin.random.Random.nextInt(0, charPool.size) }
-                .map(charPool::get)
-                .joinToString("")
+            SoyuzData.token = generateRandomString(20)
             logger.info("Soyuz Access Token: ${SoyuzData.token}")
         }
 
@@ -80,6 +84,8 @@ object Soyuz : KotlinPlugin(
             }
         }
 
+        SoyuzCommand.register()
+
         server = embeddedServer(Netty, port = SoyuzData.port) {
             install(WebSockets) {
                 pingPeriod = Duration.ofSeconds(15)
@@ -90,7 +96,7 @@ object Soyuz : KotlinPlugin(
             routing {
                 webSocket("/") {
                     val session = SoyuzWebSocketSession(this)
-                    sessions += session
+                    sessions[session.id] = session
 
                     session.connected()
 
@@ -105,7 +111,7 @@ object Soyuz : KotlinPlugin(
 
                     session.disconnected()
 
-                    sessions -= session
+                    sessions.remove(session.id)
                 }
             }
         }
@@ -115,6 +121,7 @@ object Soyuz : KotlinPlugin(
     }
 
     override fun onDisable() {
+        SoyuzCommand.unregister()
         server.stop(1000, 3000)
         logger.info("iTXTech Soyuz has been stopped")
     }

@@ -24,8 +24,10 @@
 
 package org.itxtech.soyuz
 
+import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import java.text.StringCharacterIterator
 
 @OptIn(ConsoleExperimentalApi::class)
 object SoyuzCommand : CompositeCommand(
@@ -33,5 +35,59 @@ object SoyuzCommand : CompositeCommand(
     primaryName = "soyuz",
     description = "设置 iTXTech Soyuz"
 ) {
+    @SubCommand
+    @Description("设置或重新生成 Access Token")
+    suspend fun CommandSender.token(token: String = "") {
+        SoyuzData.token = if (token == "") {
+            Soyuz.generateRandomString(20)
+        } else {
+            token
+        }
+        sendMessage("New Soyuz Access Token: ${SoyuzData.token}")
+    }
 
+    @SubCommand
+    @Description("断开指定连接")
+    suspend fun CommandSender.disconnect(@Name("connectionId") id: String) {
+        if (Soyuz.sessions.containsKey(id)) {
+            Soyuz.sessions[id]!!.disconnect()
+            sendMessage("Session $id has been disconnect")
+        } else {
+            sendMessage("Session $id does not exist")
+        }
+    }
+
+    @SubCommand
+    @Description("断开所有连接")
+    suspend fun CommandSender.disconnectAll() {
+        Soyuz.sessions.forEach {
+            it.value.disconnect()
+            sendMessage("Session ${it.value.id} has been disconnect")
+        }
+    }
+
+    @SubCommand
+    @Description("列出所有连接")
+    suspend fun CommandSender.list() {
+        Soyuz.sessions.values.forEach {
+            sendMessage("Session ${it.id}  Received: ${humanReadableSize(it.down)}  Sent: ${humanReadableSize(it.up)}")
+        }
+    }
+
+    private fun humanReadableSize(bytes: Int): String {
+        val absB = if (bytes == Int.MIN_VALUE) Int.MAX_VALUE else Math.abs(bytes)
+        if (absB < 1024) {
+            return "$bytes B"
+        }
+        var value = absB
+        val ci = StringCharacterIterator("KMGTPE")
+        var i = 40
+        while (i >= 0 && absB > 0xfffccccccccccccL shr i) {
+            value = value shr 10
+            ci.next()
+            i -= 10
+        }
+        value *= Integer.signum(bytes)
+        return String.format("%.2f %cB", value / 1024.0, ci.current())
+    }
 }

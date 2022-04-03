@@ -36,10 +36,13 @@ import java.net.InetSocketAddress
 class UnauthorizedSessionException(msg: String) : Exception(msg)
 
 @Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
-class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
+class SoyuzWebSocketSession(private val session: DefaultWebSocketServerSession) {
     private var authorized = false
     val id: String
     var connected = true
+
+    var up = 0
+    var down = 0
 
     init {
         val origin = session.call.request.origin as io.ktor.server.netty.http1.NettyConnectionPoint
@@ -56,8 +59,13 @@ class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
         connected = false
     }
 
+    suspend fun disconnect() {
+        session.close()
+    }
+
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun handle(text: String) {
+        down += text.length
         if (authorized) {
             HandlerManager.decode(this, text)
         } else {
@@ -77,6 +85,7 @@ class SoyuzWebSocketSession(val session: DefaultWebSocketServerSession) {
     }
 
     suspend fun sendText(data: String) {
+        up += data.length
         session.send(Frame.Text(data))
     }
 }
