@@ -33,6 +33,7 @@ import org.itxtech.soyuz.SoyuzWebSocketSession
 import org.itxtech.soyuz.handler.builtin.CommandHandler
 import org.itxtech.soyuz.handler.builtin.ListPluginHandler
 import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
+import org.itxtech.soyuz.handler.builtin.PushLogHandler
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
@@ -44,7 +45,7 @@ object HandlerManager {
         register(ListPluginHandler())
         register(MiraiInfoHandler())
         register(CommandHandler())
-//        register(PushLogHandler())
+        register(PushLogHandler())
     }
 
     fun register(handler: SoyuzHandler): HandlerManager {

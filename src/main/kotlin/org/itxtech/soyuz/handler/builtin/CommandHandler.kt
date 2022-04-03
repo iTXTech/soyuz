@@ -68,7 +68,7 @@ class CommandHandler : SoyuzHandler("soyuz-run-command") {
 }
 
 class SoyuzCommandSender(id: String) : CommandSender {
-    private val NAME: String = "ConsoleCommandSender[$id]"
+    private val NAME: String = "SoyuzCommandSender[$id]"
 
     override val bot: Nothing? get() = null
     override val subject: Nothing? get() = null

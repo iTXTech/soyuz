@@ -71,6 +71,15 @@ object Soyuz : KotlinPlugin(
             logger.info("Soyuz Access Token: ${SoyuzData.token}")
         }
 
+        if (SoyuzData.enablePushLog) {
+            try {
+                Class.forName("net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminalKt")
+            } catch (e: Exception) {
+                SoyuzData.enablePushLog = false
+                logger.warning("Push Log is only available when running Mirai Console Terminal")
+            }
+        }
+
         server = embeddedServer(Netty, port = SoyuzData.port) {
             install(WebSockets) {
                 pingPeriod = Duration.ofSeconds(15)
@@ -113,6 +122,6 @@ object Soyuz : KotlinPlugin(
 
 object SoyuzData : AutoSavePluginConfig("config") {
     var token by value("pending")
-    val port by value(9876)
-    val enablePushLog by value(true)
+    var port by value(9876)
+    var enablePushLog by value(true)
 }

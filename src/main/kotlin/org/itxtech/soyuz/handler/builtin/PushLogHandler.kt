@@ -24,15 +24,22 @@
 
 package org.itxtech.soyuz.handler.builtin
 
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.ConsoleFrontEndImplementation
+import net.mamoe.mirai.console.MiraiConsoleImplementation
+import net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminal
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.message.data.Message
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzData
 import org.itxtech.soyuz.SoyuzWebSocketSession
 import org.itxtech.soyuz.handler.SoyuzHandler
 
 @OptIn(ConsoleFrontEndImplementation::class, ConsoleExperimentalApi::class)
+@Suppress("INVISIBLE_REFERENCE")
 class PushLogHandler : SoyuzHandler("soyuz-push-log") {
     @Serializable
     data class PushLog(
@@ -46,6 +53,36 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
 
     val enabledSession = hashMapOf<String, SoyuzWebSocketSession>()
 
+    @OptIn(DelicateCoroutinesApi::class)
+    val context = newSingleThreadContext("PushLogHandler Message")
+
+    init {
+        if (SoyuzData.enablePushLog) {
+            try {
+                val terminal = MiraiConsoleImplementation.getInstance().origin as MiraiConsoleImplementationTerminal
+                val serviceField = terminal::class.java.getDeclaredField("logService")
+                serviceField.isAccessible = true
+                serviceField.set(
+                    terminal, SoyuzLogService(
+                        this,
+                        serviceField.get(terminal) as net.mamoe.mirai.console.terminal.LoggingService
+                    )
+                )
+
+                val senderField = terminal::class.java.getDeclaredField("consoleCommandSender")
+                senderField.isAccessible = true
+                senderField.set(
+                    terminal, SoyuzConsoleCommandSender(
+                        this,
+                        senderField.get(terminal) as MiraiConsoleImplementation.ConsoleCommandSenderImpl
+                    )
+                )
+            } catch (e: Exception) {
+                Soyuz.logger.error(e)
+            }
+        }
+    }
+
     override suspend fun handle(session: SoyuzWebSocketSession, data: String) {
         if (SoyuzData.enablePushLog) {
             val en = Soyuz.json.decodeFromString(PushLog.serializer(), data)
@@ -55,5 +92,51 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
                 enabledSession.remove(session.id)
             }
         }
+    }
+
+    fun sendLine(line: String) {
+        Soyuz.launch(context) {
+            val it = enabledSession.iterator()
+            while (it.hasNext()) {
+                val session = it.next()
+                if (!session.value.connected) {
+                    it.remove()
+                } else {
+                    session.value.sendText(Soyuz.json.encodeToString(Log.serializer(), Log(key, line)))
+                }
+            }
+        }
+    }
+}
+
+@Suppress(
+    "SEALED_INHERITOR_IN_DIFFERENT_MODULE", "SEALED_INHERITOR_IN_DIFFERENT_PACKAGE",
+    "INVISIBLE_MEMBER", "INVISIBLE_ABSTRACT_MEMBER_FROM_SUPER_ERROR", "INVISIBLE_REFERENCE",
+    "CANNOT_OVERRIDE_INVISIBLE_MEMBER", "NOTHING_TO_OVERRIDE"
+)
+internal class SoyuzLogService(
+    private val pushLogHandler: PushLogHandler,
+    private val base: net.mamoe.mirai.console.terminal.LoggingService
+) :
+    net.mamoe.mirai.console.terminal.LoggingService() {
+    override fun `pushLine$mirai_console_terminal`(line: String) {
+        base.pushLine(line)
+        pushLogHandler.sendLine(line)
+    }
+}
+
+@ConsoleFrontEndImplementation
+internal class SoyuzConsoleCommandSender(
+    private val pushLogHandler: PushLogHandler,
+    private val base: MiraiConsoleImplementation.ConsoleCommandSenderImpl
+) :
+    MiraiConsoleImplementation.ConsoleCommandSenderImpl {
+    override suspend fun sendMessage(message: String) {
+        base.sendMessage(message)
+        pushLogHandler.sendLine(message)
+    }
+
+    override suspend fun sendMessage(message: Message) {
+        return sendMessage(message.toString())
     }
 }
