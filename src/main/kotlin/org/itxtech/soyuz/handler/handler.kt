@@ -25,15 +25,11 @@
 package org.itxtech.soyuz.handler
 
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import org.itxtech.soyuz.BaseMessage
 import org.itxtech.soyuz.ReplyMessage
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzWebSocketSession
-import org.itxtech.soyuz.handler.builtin.CommandHandler
-import org.itxtech.soyuz.handler.builtin.ListPluginHandler
-import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
-import org.itxtech.soyuz.handler.builtin.PushLogHandler
+import org.itxtech.soyuz.handler.builtin.*
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
@@ -46,6 +42,8 @@ object HandlerManager {
         register(MiraiInfoHandler())
         register(CommandHandler())
         register(PushLogHandler())
+
+        initializeMclHandler()
     }
 
     fun register(handler: SoyuzHandler): HandlerManager {
@@ -78,7 +76,7 @@ suspend inline fun handleMessage(
         block(Soyuz.json.decodeFromString(BaseMessage.serializer(), text))
         return true
     } catch (e: Throwable) {
-        session.sendText(Soyuz.json.encodeToString(ReplyMessage.error(e.message ?: "Error with no message")))
+        session.sendText(ReplyMessage.error(e.message ?: "Error with no message").toJson())
         Soyuz.logger.error(e)
     }
     return false

@@ -28,7 +28,6 @@ import io.ktor.features.*
 import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.encodeToString
 import org.itxtech.soyuz.handler.HandlerManager
 import org.itxtech.soyuz.handler.handleMessage
 import java.net.InetSocketAddress
@@ -74,7 +73,7 @@ class SoyuzWebSocketSession(private val session: DefaultWebSocketServerSession) 
                     val msg = Soyuz.json.decodeFromString(AuthorizeMessage.serializer(), text)
                     if (msg.token == SoyuzData.token) {
                         authorized = true
-                        sendText(Soyuz.json.encodeToString(ReplyMessage("authorize", "Session has been authorized")))
+                        sendText(ReplyMessage("authorize", "Session has been authorized").toJson())
                         Soyuz.logger.info("Session $id has been authorized")
                         return
                     }

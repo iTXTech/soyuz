@@ -61,7 +61,7 @@ object Soyuz : KotlinPlugin(
 
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 
-    val sessions = Collections.synchronizedMap<String, SoyuzWebSocketSession>(LinkedHashMap())
+    val sessions: MutableMap<String, SoyuzWebSocketSession> = Collections.synchronizedMap(LinkedHashMap())
 
     fun generateRandomString(len: Int) = (1..len)
         .map { kotlin.random.Random.nextInt(0, charPool.size) }

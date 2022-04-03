@@ -33,14 +33,15 @@ data class BaseMessage(
 
 @Serializable
 data class ReplyMessage(
-    val key: String,
-    val msg: String
+    val key: String, val msg: String
 ) {
     companion object {
         fun error(msg: String): ReplyMessage {
             return ReplyMessage("error", msg)
         }
     }
+
+    fun toJson(): String = Soyuz.json.encodeToString(serializer(), this)
 }
 
 @Serializable

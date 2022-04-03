@@ -48,7 +48,7 @@ object SoyuzCommand : CompositeCommand(
 
     @SubCommand
     @Description("断开指定连接")
-    suspend fun CommandSender.disconnect(@Name("connectionId") id: String) {
+    suspend fun CommandSender.disconnect(@Name("连接ID") id: String) {
         if (Soyuz.sessions.containsKey(id)) {
             Soyuz.sessions[id]!!.disconnect()
             sendMessage("Session $id has been disconnect")
