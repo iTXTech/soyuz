@@ -37,8 +37,12 @@ dependencies {
     implementation("io.ktor:ktor-server-core:1.6.8")
 }
 
-tasks.named<Jar>("jar") {
+tasks.create<Jar>("fatJar") {
+    dependsOn("jar")
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    archiveFileName.set("soyuz-${project.version}-all.jar")
 
     manifest {
         attributes["Name"] = "iTXTech Soyuz"
@@ -56,7 +60,13 @@ tasks.named<Jar>("jar") {
         }
     }
 
-    from(list)
+    from(list, sourceSets.main.get().output)
+}
+
+tasks {
+    "assemble" {
+        dependsOn("fatJar")
+    }
 }
 
 mavenCentralPublish {

@@ -30,6 +30,7 @@ import org.itxtech.soyuz.BaseMessage
 import org.itxtech.soyuz.ReplyMessage
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzWebSocketSession
+import org.itxtech.soyuz.handler.builtin.CommandHandler
 import org.itxtech.soyuz.handler.builtin.ListPluginHandler
 import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
 
@@ -42,6 +43,7 @@ object HandlerManager {
     init {
         register(ListPluginHandler())
         register(MiraiInfoHandler())
+        register(CommandHandler())
 //        register(PushLogHandler())
     }
 
