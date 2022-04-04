@@ -2,6 +2,28 @@
 
 约定，请求和回复的`key`一致。
 
+## `Authorize`
+
+所有连接建立后，都需要认证。若在未认证情况下发送其他指令，都会抛出错误。
+
+### 请求
+
+```json
+{
+  "key": "authorize",
+  "token": "Access Token"
+}
+```
+
+### 回复
+
+```json
+{
+  "key": "authorize",
+  "msg": "Session has been authorized 或错误信息"
+}
+```
+
 ## `Run Command`
 
 ### 请求

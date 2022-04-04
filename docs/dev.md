@@ -79,6 +79,8 @@ class ExampleHandler : SoyuzHandler("do-something") {
 
 ### 注册 `Handler`
 
+`Handler Key` 不可重复，若与现有的重复则将抛出错误。
+
 ```kotlin
 import org.itxtech.soyuz.handler.HandlerManager
 
