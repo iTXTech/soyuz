@@ -29,7 +29,10 @@ import org.itxtech.soyuz.BaseMessage
 import org.itxtech.soyuz.ReplyMessage
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzWebSocketSession
-import org.itxtech.soyuz.handler.builtin.*
+import org.itxtech.soyuz.handler.builtin.CommandHandler
+import org.itxtech.soyuz.handler.builtin.ListPluginHandler
+import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
+import org.itxtech.soyuz.handler.builtin.PushLogHandler
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
@@ -42,8 +45,6 @@ object HandlerManager {
         register(MiraiInfoHandler())
         register(CommandHandler())
         register(PushLogHandler())
-
-        initializeMclHandler()
     }
 
     fun register(handler: SoyuzHandler): HandlerManager {

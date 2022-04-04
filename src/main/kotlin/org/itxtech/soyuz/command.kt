@@ -28,6 +28,7 @@ import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import java.text.StringCharacterIterator
+import kotlin.math.abs
 
 @OptIn(ConsoleExperimentalApi::class)
 object SoyuzCommand : CompositeCommand(
@@ -75,7 +76,7 @@ object SoyuzCommand : CompositeCommand(
     }
 
     private fun humanReadableSize(bytes: Int): String {
-        val absB = if (bytes == Int.MIN_VALUE) Int.MAX_VALUE else Math.abs(bytes)
+        val absB = if (bytes == Int.MIN_VALUE) Int.MAX_VALUE else abs(bytes)
         if (absB < 1024) {
             return "$bytes B"
         }

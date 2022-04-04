@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "org.itxtech"
-version = "1.0.0"
+version = "1.0.0-beta.1"
 description = "The Websocket API Server for Mirai Console"
 
 kotlin {

@@ -10,21 +10,19 @@
 
 * 接入 `Mirai Console Terminal` 实时查看终端输出
 * 接入 `Mirai Console` 执行命令，监控运行状态
+* 接入 `Mirai Console Loader` 进行包管理 - 请安装 [MCL Addon](https://github.com/iTXTech/mcl-addon)
 
 即将到来：
 
-* 接入 `Mirai Console Loader` 进行包管理
 * 接入 `Mirai Web Panel` 使用 `WebUI` 管理 `Mirai Console`
-
-~~请注意，`iTXTech Soyuz`尚在`pre-alpha`阶段，可能存在各种`bug`和安全性问题，请小心使用，如遇问题请立即前往`issue`发送反馈。~~
 
 ## `/soyuz` 命令
 
 ```
-/soyuz disconnect <connectionId>    # 断开指定连接
-/soyuz disconnectAll                # 断开所有连接
-/soyuz list                         # 列出所有连接
-/soyuz token [token]                # 设置或重新生成 Access Token
+/soyuz disconnect <连接ID>   # 断开指定连接
+/soyuz disconnectAll         # 断开所有连接
+/soyuz list                  # 列出所有连接
+/soyuz token [token]         # 设置或重新生成 Access Token
 ```
 
 ## 安装
