@@ -38,6 +38,7 @@ dependencies {
 }
 
 tasks.create<Jar>("fatJar") {
+    archiveClassifier.set("all")
     dependsOn("jar")
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -73,6 +74,10 @@ mavenCentralPublish {
     singleDevGithubProject("iTXTech", "soyuz")
     licenseAGplV3()
     useCentralS01()
+
+    publication {
+        artifacts.artifact(tasks.getByName("fatJar"))
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
