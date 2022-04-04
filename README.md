@@ -2,6 +2,8 @@
 
 为 [Mirai Console](https://github.com/mamoe/mirai) 提供可扩展、轻量级的`Websocket API` 服务。
 
+关于`开发`，`内置Handler`等，请 [查看文档](docs/README.md)。
+
 ## 特性
 
 可扩展的架构，任何插件都可以在 `iTXTech Soyuz` 中注册 `Handler` 实现功能。
@@ -22,7 +24,7 @@
 /soyuz disconnect <连接ID>   # 断开指定连接
 /soyuz disconnectAll         # 断开所有连接
 /soyuz listConnections       # 列出所有连接
-/soyuz listHandlers        s  # 列出所有Handler
+/soyuz listHandlers          # 列出所有Handler
 /soyuz token [token]         # 设置或重新生成 Access Token
 ```
 

@@ -33,6 +33,7 @@ import net.mamoe.mirai.console.MiraiConsoleImplementation
 import net.mamoe.mirai.console.terminal.MiraiConsoleImplementationTerminal
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.message.data.Message
+import org.itxtech.soyuz.ReplyMessage
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzData
 import org.itxtech.soyuz.SoyuzWebSocketSession
@@ -46,12 +47,7 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
         val enable: Boolean
     )
 
-    @Serializable
-    data class Log(
-        val key: String, val msg: String
-    )
-
-    val enabledSession = hashMapOf<String, SoyuzWebSocketSession>()
+    private val enabledSession = hashMapOf<String, SoyuzWebSocketSession>()
 
     @OptIn(DelicateCoroutinesApi::class)
     val context = newSingleThreadContext("PushLogHandler Message")
@@ -91,6 +87,9 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
             } else {
                 enabledSession.remove(session.id)
             }
+            session.sendText(ReplyMessage(key, "success").toJson())
+        } else {
+            session.sendText(ReplyMessage(key, "Push Log is globally disabled").toJson())
         }
     }
 
@@ -102,7 +101,7 @@ class PushLogHandler : SoyuzHandler("soyuz-push-log") {
                 if (!session.value.connected) {
                     it.remove()
                 } else {
-                    session.value.sendText(Soyuz.json.encodeToString(Log.serializer(), Log(key, line)))
+                    session.value.sendText(ReplyMessage(key, line).toJson())
                 }
             }
         }
