@@ -29,22 +29,20 @@ import org.itxtech.soyuz.BaseMessage
 import org.itxtech.soyuz.ReplyMessage
 import org.itxtech.soyuz.Soyuz
 import org.itxtech.soyuz.SoyuzWebSocketSession
-import org.itxtech.soyuz.handler.builtin.CommandHandler
-import org.itxtech.soyuz.handler.builtin.ListPluginHandler
-import org.itxtech.soyuz.handler.builtin.MiraiInfoHandler
-import org.itxtech.soyuz.handler.builtin.PushLogHandler
+import org.itxtech.soyuz.handler.builtin.*
 
 class HandlerAlreadyExistsException(msg: String) : Exception(msg)
 class InvalidSoyuzMessageException(msg: String) : Exception(msg)
 
 object HandlerManager {
-    private val handlers = hashMapOf<String, SoyuzHandler>()
+    val handlers = hashMapOf<String, SoyuzHandler>()
 
     init {
         register(ListPluginHandler())
         register(MiraiInfoHandler())
         register(CommandHandler())
         register(PushLogHandler())
+        register(ListHandlerHandler())
     }
 
     fun register(handler: SoyuzHandler): HandlerManager {

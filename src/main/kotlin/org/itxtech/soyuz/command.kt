@@ -27,6 +27,7 @@ package org.itxtech.soyuz
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import org.itxtech.soyuz.handler.HandlerManager
 import java.text.StringCharacterIterator
 import kotlin.math.abs
 
@@ -69,9 +70,17 @@ object SoyuzCommand : CompositeCommand(
 
     @SubCommand
     @Description("列出所有连接")
-    suspend fun CommandSender.list() {
+    suspend fun CommandSender.listConnections() {
         Soyuz.sessions.values.forEach {
             sendMessage("Session ${it.id}  Received: ${humanReadableSize(it.down)}  Sent: ${humanReadableSize(it.up)}")
+        }
+    }
+
+    @SubCommand
+    @Description("列出所有Handler")
+    suspend fun CommandSender.listHandlers() {
+        HandlerManager.handlers.forEach {
+            sendMessage("Handler ${it.key}    Class: ${it.value::class.qualifiedName}")
         }
     }
 

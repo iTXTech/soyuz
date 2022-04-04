@@ -21,7 +21,8 @@
 ```
 /soyuz disconnect <连接ID>   # 断开指定连接
 /soyuz disconnectAll         # 断开所有连接
-/soyuz list                  # 列出所有连接
+/soyuz listConnections       # 列出所有连接
+/soyuz listHandlers        s  # 列出所有Handler
 /soyuz token [token]         # 设置或重新生成 Access Token
 ```
 
