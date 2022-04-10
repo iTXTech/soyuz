@@ -44,7 +44,7 @@ object Soyuz : KotlinPlugin(
     JvmPluginDescription(
         id = "org.itxtech.soyuz",
         name = "Soyuz",
-        version = "1.0.0-beta.1"
+        version = "1.0.0"
     ) {
         author("PeratX")
         info("The Websocket API Server for Mirai Console")
